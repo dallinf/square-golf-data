@@ -1,6 +1,4 @@
-# Welcome to Remix!
-
-- 📖 [Remix docs](https://remix.run/docs)
+Show shot data from the Square Golf Launch Monitor
 
 ## Development
 
