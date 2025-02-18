@@ -5,6 +5,7 @@ import { ShotScatterChart } from "~/components/ShotScatterChart";
 import { calculateAveragesByDate } from "~/utils/shotCalculations";
 import { ShotDetailsTable } from "~/components/ShotDetailsTable";
 import { CsvUploadForm } from "~/components/CsvUploadForm";
+import { ShotDetailsTableNew } from "~/components/ShotDetailsTableNew";
 
 // Add interface for Shot data
 interface Shot {
@@ -126,13 +127,7 @@ export default function Index() {
         />
       </div>
 
-      <div className="grid gap-6">
-        {groupedShots.map(({ club, date, shots }) => (
-          <div key={`${club}-${date}`} className="border rounded-lg p-4">
-            <ShotDetailsTable club={club} date={date} shots={shots} />
-          </div>
-        ))}
-      </div>
+      <ShotDetailsTableNew shots={shots} />
     </div>
   );
 }
