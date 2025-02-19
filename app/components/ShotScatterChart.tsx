@@ -11,22 +11,10 @@ import { Shot } from "~/types/shot";
 
 interface ShotScatterChartProps {
   shots: Shot[];
-  selectedClub: string;
-  selectedDate: string;
 }
 
-export function ShotScatterChart({
-  shots,
-  selectedClub,
-  selectedDate,
-}: ShotScatterChartProps) {
+export function ShotScatterChart({ shots }: ShotScatterChartProps) {
   const scatterData = shots
-    .filter((shot) => selectedClub === "all" || shot.club === selectedClub)
-    .filter(
-      (shot) =>
-        selectedDate === "all" ||
-        new Date(shot.date).toISOString().split("T")[0] === selectedDate
-    )
     .filter((shot) => shot.offlineDistance !== 0)
     .map((shot) => ({
       offlineDistance: shot.offlineDistance,

@@ -1,9 +1,8 @@
 import type { MetaFunction } from "@remix-run/node";
 import { useState } from "react";
 import { BallSpeedChart } from "~/components/BallSpeedChart";
-import { ShotScatterChart } from "~/components/ShotScatterChart";
+import { ShotScatterChartNew } from "~/components/ShotScatterChartNew";
 import { calculateAveragesByDate } from "~/utils/shotCalculations";
-import { ShotDetailsTable } from "~/components/ShotDetailsTable";
 import { CsvUploadForm } from "~/components/CsvUploadForm";
 import { ShotDetailsTableNew } from "~/components/ShotDetailsTableNew";
 
@@ -30,46 +29,12 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const [shots, setShots] = useState<Shot[]>([]);
-  const [selectedClub, setSelectedClub] = useState<string>("i7");
-  const [selectedDate, setSelectedDate] = useState<string>("all");
+  const [visibleShots, setVisibleShots] = useState<Shot[]>([]);
 
-  const uniqueClubs = Array.from(
-    new Set(shots.map((shot) => shot.club))
-  ).sort();
-
-  const uniqueDates = Array.from(
-    new Set(
-      shots
-        .filter((shot) => selectedClub === "all" || shot.club === selectedClub)
-        .map((shot) => new Date(shot.date).toISOString().split("T")[0])
-    )
-  )
-    .sort()
-    .reverse();
-
-  // Group shots by club and date
-  const groupedShots = Object.values(
-    shots
-      .filter((shot) => selectedClub === "all" || shot.club === selectedClub)
-      .reduce((acc, shot) => {
-        const key = `${shot.club}-${shot.date}`;
-        if (!acc[key]) {
-          acc[key] = {
-            club: shot.club,
-            date: shot.date.toISOString(),
-            shots: [],
-          };
-        }
-        acc[key].shots.push(shot);
-        return acc;
-      }, {} as Record<string, { club: string; date: string; shots: Shot[] }>)
-  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  // Add this after groupedShots calculation
-  const chartData = calculateAveragesByDate(shots, selectedClub);
+  const chartData = calculateAveragesByDate(visibleShots);
 
   return (
-    <div className="p-8">
+    <div className="p-8 gap-8 flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Golf Shot Data</h1>
         <CsvUploadForm
@@ -79,55 +44,20 @@ export default function Index() {
         />
       </div>
 
-      <div className="mb-6">
-        <label htmlFor="clubFilter" className="mr-2">
-          Filter by Club:
-        </label>
-        <select
-          id="clubFilter"
-          value={selectedClub}
-          onChange={(e) => setSelectedClub(e.target.value)}
-          className="border rounded px-2 py-1"
-        >
-          <option value="all">All Clubs</option>
-          {uniqueClubs.map((club) => (
-            <option key={club} value={club}>
-              {club}
-            </option>
-          ))}
-        </select>
-      </div>
+      <ShotDetailsTableNew
+        shots={shots}
+        onFilteredShotsChanged={(filteredShots) => {
+          setVisibleShots(filteredShots);
+        }}
+      />
 
-      <BallSpeedChart chartData={chartData} />
+      {/* <BallSpeedChart chartData={chartData} /> */}
 
       <div className="mb-24 h-[400px]">
         <h2 className="text-xl font-semibold mb-4">Individual Shots</h2>
-        <div className="mb-4">
-          <label htmlFor="dateFilter" className="mr-2">
-            Filter by Date:
-          </label>
-          <select
-            id="dateFilter"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="border rounded px-2 py-1"
-          >
-            <option value="all">All Dates</option>
-            {uniqueDates.map((date) => (
-              <option key={date} value={date}>
-                {new Date(date).toLocaleDateString()}
-              </option>
-            ))}
-          </select>
-        </div>
-        <ShotScatterChart
-          shots={shots}
-          selectedClub={selectedClub}
-          selectedDate={selectedDate}
-        />
-      </div>
 
-      <ShotDetailsTableNew shots={shots} />
+        <ShotScatterChartNew shots={visibleShots} />
+      </div>
     </div>
   );
 }
