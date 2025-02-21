@@ -6,6 +6,16 @@ interface Props {
   onShotsUploaded: (newShots: Shot[]) => void;
 }
 
+const parseNumberString = (str: string) => {
+  return str.endsWith("L")
+    ? parseFloat(str.slice(0, -1)) * -1
+    : parseFloat(str);
+};
+
+const parseNumber = (str: string) => {
+  return str.includes("-") ? null : parseFloat(str);
+};
+
 export function CsvUploadForm({ onShotsUploaded }: Props) {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -36,7 +46,10 @@ export function CsvUploadForm({ onShotsUploaded }: Props) {
 
           const relevantContent = lines
             .filter(
-              (line) => line.length > 0 && !line.trim().startsWith("Dates")
+              (line) =>
+                line.length > 0 &&
+                !line.trim().startsWith("Dates") &&
+                !line.startsWith(",")
             )
             .join("\n");
 
@@ -51,18 +64,25 @@ export function CsvUploadForm({ onShotsUploaded }: Props) {
               (record: any) => record["Club"] && record["Club"].length > 0
             )
             .map((record: any) => {
-              const offlineDistanceStr = record["Offline(yd)"];
-              const offlineDistance = offlineDistanceStr.endsWith("L")
-                ? parseFloat(offlineDistanceStr.slice(0, -1)) * -1
-                : parseFloat(offlineDistanceStr);
+              const offlineDistance = parseNumberString(record["Offline(yd)"]);
 
               return {
                 club: record["Club"],
                 index: parseInt(record["Index"]),
-                ballSpeed: parseFloat(record["Ball Speed(mph)"]),
-                totalDistance: parseFloat(record["Total(yd)"]),
-                carryDistance: parseFloat(record["Carry(yd)"]),
+                ballSpeed: parseNumber(record["Ball Speed(mph)"]) || 0,
+                launchAngle: parseNumber(record["Launch Angle"]) || 0,
+                launchDir: parseNumber(record["Launch Dir"]) || 0,
+                spinRate: parseNumber(record["Spin Rate"]),
+                spinAxis: parseNumber(record["Spin Axis"]),
+                backSpin: parseNumber(record["Back Spin"]),
+                sideSpin: parseNumber(record["Side Spin"]),
+                totalDistance: parseNumber(record["Total(yd)"]) || 0,
+                carryDistance: parseNumber(record["Carry(yd)"]) || 0,
                 offlineDistance: Number((offlineDistance / 3.2).toFixed(1)), // Square has a bug that makes the offline distance 3.2x the actual distance
+                clubPath: parseNumberString(record["Club Path"]),
+                faceAngle: parseNumberString(record["Face Angle"]),
+                attackAngle: parseNumber(record["Attack Angle"]),
+                dynamicLoft: parseNumber(record["Dynamic Loft"]),
                 filename: file.name,
                 place: place,
                 date: date,

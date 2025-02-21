@@ -2,23 +2,9 @@ import type { MetaFunction } from "@remix-run/node";
 import { useState } from "react";
 import { BallSpeedChart } from "~/components/BallSpeedChart";
 import { ShotScatterChartNew } from "~/components/ShotScatterChartNew";
-import { calculateAveragesByDate } from "~/utils/shotCalculations";
 import { CsvUploadForm } from "~/components/CsvUploadForm";
 import { ShotDetailsTableNew } from "~/components/ShotDetailsTableNew";
-
-// Add interface for Shot data
-interface Shot {
-  club: string;
-  index: number;
-  ballSpeed: number;
-  carryDistance: number;
-  totalDistance: number;
-  offlineDistance: number;
-  filename: string;
-  place: string;
-  date: Date;
-  timeSinceEpoch: number;
-}
+import { Shot } from "~/types/shot";
 
 export const meta: MetaFunction = () => {
   return [
@@ -30,8 +16,6 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const [shots, setShots] = useState<Shot[]>([]);
   const [visibleShots, setVisibleShots] = useState<Shot[]>([]);
-
-  const chartData = calculateAveragesByDate(visibleShots);
 
   return (
     <div className="p-8 gap-8 flex flex-col">
